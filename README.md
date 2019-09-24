@@ -36,7 +36,7 @@ contains functions that build the shearlet frames for regularization: *buildDire
 contains functions to simulate aligned reconstruction problems: *decodeDISORDER.m*, *directionDISORDER.m*, *encodeDISORDER.m*, *errorFit.m*, *generateParametersExp.m*, *gradientDISORDER.m*, *precondDISORDER.m*, *pyramidDISORDER.m*, *SNRToLevels.m*, *synthesizeEncoding.m*, *synthesizeT.m*, *synthesizeY.m*, *Xsolver.m*.
 
 
-NOTE 1: Exemplary data is provided in the datasets *exampleSpectrum.txt* (used by *fig0304.m*), *GT.mat* and *Q[1-3].mat* (used by *fig050607.m*), *xGT.mat* (used by *fig0809.m*). For runs without changing the paths, they should be placed in a folder
+NOTE 1: Exemplary data is provided in the datasets *exampleSpectrum.txt* (used by *fig0304.m*), *GT.mat* and *Q[1-3].mat* (used by *fig0809.m*), *xGT.mat* (used by *fig050607.m*). For runs without changing the paths, they should be placed in a folder
 ###### ../DISORDERData
 Data generated when running the scripts is also stored in this folder as *fig0[5-7].mat*, *GT_[Aq,AqPh,Di,DiPh,Re,RePh].nii*, *Q[1-3]_[Aq,AqPh,Di,DiPh,Re,RePh].nii*.
 
@@ -44,5 +44,5 @@ Data generated when running the scripts is also stored in this folder as *fig0[5
 NOTE 2: As for simulations, the provided execution should give a simplified version of the Figures in the paper, set 'quick=0' when calling *fig050607.m* to generate all the plots. As for reconstructions on real data *fig0809.m* these are computationally heavy; please, refer to the computation details in the manuscript to assess if your computing resources are adequate.
 
 
-NOTE 3: The data to reproduce the experiments of Fig. 9 could not be linked to the release due to memory limitations. Please contact lucilio.cordero_grande@kcl.ac.uk if you are interested in these datasets (*BSSFP.mat*, *FLAIR.mat*, *MPRAGE.mat*, *SPGR.mat*, *TSE.mat*, used by *fig0809.m* to generate *BSSDP_[Aq,AqPh,Di,DiPh,Re,RePh].nii*, *FLAIR_[Aq,AqPh,Di,DiPh,Re,RePh].nii*, *MPRAGE_[Aq,AqPh,Di,DiPh,Re,RePh].nii*, *SPGR_[Aq,AqPh,Di,DiPh,Re,RePh].nii*, *TSE_[Aq,AqPh,Di,DiPh,Re,RePh].nii*).
+NOTE 3: The data to reproduce the experiments of Fig. 9 could not be linked to the release due to memory limitations. Please contact lucilio.cordero_grande@kcl.ac.uk if you are interested in these datasets (*BSSFP.mat*, *FLAIR.mat*, *MPRAGE.mat*, *SPGR.mat*, *TSE.mat*, used by *fig0809.m* to generate *BSSFP_[Aq,AqPh,Di,DiPh,Re,RePh].nii*, *FLAIR_[Aq,AqPh,Di,DiPh,Re,RePh].nii*, *MPRAGE_[Aq,AqPh,Di,DiPh,Re,RePh].nii*, *SPGR_[Aq,AqPh,Di,DiPh,Re,RePh].nii*, *TSE_[Aq,AqPh,Di,DiPh,Re,RePh].nii*).
 
