@@ -43,3 +43,6 @@ Data generated when running the scripts is also stored in this folder as *BSSFP_
 
 NOTE 2: As for simulations, the provided execution should give a simplified version of the Figures in the paper, set 'quick=0' when calling *fig050607.m* to generate all the plots. As for reconstructions on real data *fig0809.m* these are computationally heavy; please, refer to the computation details in the manuscript to assess if your computing resources are adequate.
 
+
+NOTE 3: The data to reproduce the experiments of Fig. 9 could not be linked to the release due to memory limitations. Please contact lucilio.cordero_grande@kcl.ac.uk if you are interested in these datasets.
+
