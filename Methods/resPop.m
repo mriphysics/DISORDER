@@ -16,7 +16,10 @@ function [x,N]=resPop(x,orDim,M,deDim)
 
 N=size(x);NDor=ndims(x);
 
-if nargin<3 || isempty(M);M=N(orDim(orDim<=NDor));M=[M ones(sum(orDim>NDor))];end
+if nargin<3 || isempty(M)
+    M=N(orDim(orDim<=NDor));M=[M ones(sum(orDim>NDor))];
+    if length(deDim)==1;M=prod(M);end
+end
 if nargin<4;deDim=[];end
 
 indTrim=find(M~=1,1,'last');
