@@ -30,7 +30,7 @@ NY=size(x);
 if ~isempty(SH);NX=size(SH);else NX=NY;end
 
 if ~isempty(A) && numel(A)~=2;x=bsxfun(@times,x,A);end%A^H
-for m=1:2;x=ifftGPU(x,m,gpuF);end%F^H
+for m=1:2;x=ifftGPU(x,m);end%F^H
 for m=1:2    
     NR=ones(1,2);
     if ~isempty(B{m});NR(m)=size(B{m},5+m);end

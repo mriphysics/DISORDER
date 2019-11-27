@@ -49,12 +49,12 @@ for m=1:nDimsOu
         if mirror(m)~=2;x=mirroring(x,mirrorin==1,1);end%MIRRORING FUNCTION NOT INCLUDED
         if ~fo
             if mirror(m)==2
-                x=fctGPU(x,m,gpuF)/sqrt(NorM(m));%FCT FUNCTION NOT INCLUDED
+                x=fctGPU(x,m)/sqrt(NorM(m));%FCT FUNCTION NOT INCLUDED
             elseif ~quick
-                x=fftGPU(x,m,gpuF)/NorM(m);
+                x=fftGPU(x,m)/NorM(m);
             else               
-                F=build1DFTM(NorM(m),0,gpu,~comp)/NorM(m);
-                x=fftGPU(x,m,gpuF,F,~comp);
+                F=build1DFTM(NorM(m),0,gpu)/NorM(m);
+                x=fftGPU(x,m,F);
             end
         end
         if ~quick || fo~=0 || mirror(m)==2 || comp
@@ -76,17 +76,17 @@ for m=1:nDimsOu
             if Nor(m)<Nres(m);x=dynInd(xRes,orig(m):fina(m),m,x);else x=dynInd(x,orig(m):fina(m),m);end
             if fo~=2 && mirror(m)~=2;x=ifftshift(x,m);end           
             if ~fo
-                if mirror(m)==2;x=ifctGPU(x,m,gpuF)*sqrt(NresM(m));else x=ifftGPU(x,m,gpuF)*NresM(m);end                 
+                if mirror(m)==2;x=ifctGPU(x,m)*sqrt(NresM(m));else x=ifftGPU(x,m)*NresM(m);end                 
             end
         else
-            [~,FH]=build1DFTM(NresM(m),0,gpu,~comp);
+            [~,FH]=build1DFTM(NresM(m),0,gpu);
             if NresM(m)>NorM(m)
                 FH=FH(:,1:NorM(m))*NresM(m);
                 if mod(NorM(m),2)==0;FH(:,end)=FH(:,end)/2;end
             else
                 x=dynInd(x,1:NresM(m),m)*NresM(m);
             end
-            x=ifftGPU(x,m,gpuF,FH,~comp);
+            x=ifftGPU(x,m,FH);
         end
         if mirror(m)~=2;x=mirroring(x,mirrorin==1,0);end
         mirrorin(m)=0;

@@ -17,17 +17,19 @@ if isempty(x);return;end
 assert(~isempty(dims) && dims>=1,'Dimensions to be mapped have to be meaningful');
 
 Nper=length(dims);
-N=size(x);N(end+1:end+Nper)=1;
+N=size(x);N(end+1:max(dims))=1;
+ndimsx=length(N);
+N(end+1:end+Nper)=1;
 
-nodims=1:ndims(x)+Nper;nodims(dims)=[];
+nodims=1:ndimsx+Nper;nodims(dims)=[];
 if ~col
     if max(dims)~=1
-        perm(1:Nper)=dims;perm(Nper+1:ndims(x)+Nper)=nodims;
+        perm(1:Nper)=dims;perm(Nper+1:ndimsx+Nper)=nodims;
         x=permute(x,perm);
     end
     x=reshape(x,[prod(N(dims)) prod(N(nodims))]);
 else
-    perm(1:ndims(x))=nodims;perm(ndims(x)+1:ndims(x)+Nper)=dims;
+    perm(1:ndimsx)=nodims;perm(ndimsx+1:ndimsx+Nper)=dims;
     x=permute(x,perm);
     x=reshape(x,[prod(N(nodims)) prod(N(dims))]);
 end

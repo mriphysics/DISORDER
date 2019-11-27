@@ -1,4 +1,4 @@
-function [resPyr,L,estT,resIso]=pyramidPlan(voxSiz,resolMax,NWend,accel)
+function [resPyr,L,estT,resIso,estB]=pyramidPlan(voxSiz,resolMax,NWend,accel)
 
 %PYRAMIDPLAN  Constructs a multirresolution plan on the basis of some 
 %parameters
@@ -13,6 +13,7 @@ function [resPyr,L,estT,resIso]=pyramidPlan(voxSiz,resolMax,NWend,accel)
 %   ** ESTT indicates whether to estimate motion for each level
 %   ** RESISO is the equivalent isotropic resolution normalized to 0.7, 
 %   which is the maximum expected
+%   ** ESTB indicates whether to estimate dephasing for each level
 %
 
 Lr=round(log2(max(resolMax/min(voxSiz),1)))+1;%Number of spatial multiresolution levels
@@ -27,3 +28,6 @@ L=max(L-accel(2),1);
 estT=estT(1:L);
 resIso=resIso(1:L);
 resPyr=resPyr(1:L);
+
+estB=zeros(1:L);
+estB(find(estT==1,1,'last'))=1;

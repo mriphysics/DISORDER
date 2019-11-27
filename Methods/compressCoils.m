@@ -1,4 +1,4 @@
-function [S,y,C,D,U]=compressCoils(S,perc,y,useFold,useInvMot)
+function [S,y,C,D,U]=compressCoils(S,perc,y,useFold,useInvMot,quick)
 
 % COMPRESSCOILS performs channel compression based on [1] M Buehrer, 
 %   KP Pruessmann, P Boesiger, S Kozerke, "Array Compression for MRI With 
@@ -25,6 +25,7 @@ function [S,y,C,D,U]=compressCoils(S,perc,y,useFold,useInvMot)
 if nargin<3;y=[];end
 if nargin<4 || isempty(useFold);useFold=1;end
 if nargin<5 || isempty(useInvMot);useInvMot=0;end
+if nargin<6 || isempty(quick);quick=0;end
 
 gpu=isa(S,'gpuArray');gpuIn=single(gpuDeviceCount && ~blockGPU);
 
@@ -71,18 +72,21 @@ if ~isempty(perc)
              end
         end
         Sbis=[];SF=[];SFH=[];
-    else
-        SH=conj(S);
-        Normal=(sum(SH.*S,4)+reg).^(-1);
-        Saux=bsxfun(@times,S,Normal);Normal=[];
+    else          
         perm=1:14;perm([4 5])=[5 4];
-        SH=permute(SH,perm);
-        P=single(zeros(NY(4),NY(4)));
-        for l=1:NS(3)
-            Sbis=bsxfun(@times,dynInd(Saux,l,3),dynInd(SH,l,3));    
-            P=P+shiftdim(multDimSum(Sbis,1:2),3);
-        end
-        Saux=[];SH=[];Sbis=[];
+        SH=permute(conj(S),perm);
+        Saux=bsxfun(@times,S,1./(normm(S,[],4)+reg));
+        %Saux=S;
+        if quick
+            P=shiftdim(multDimSum(bsxfun(@times,Saux,SH),1:3),3);
+        else
+            P=zeros([NY(4) NY(4)],'like',Saux);
+            for l=1:NS(3)
+                Sbis=bsxfun(@times,dynInd(Saux,l,3),dynInd(SH,l,3));    
+                P=P+shiftdim(multDimSum(Sbis,1:2),3);
+            end
+        end       
+        Saux=[];SH=[];Sbis=[];        
     end
     P=gather(P);
     %Compute F

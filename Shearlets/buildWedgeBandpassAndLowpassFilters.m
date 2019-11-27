@@ -119,11 +119,11 @@ end
 LP=fft2D(resampling(FLP1{1}'*FLP1{1},N,2));    
 
 function x=fft2D(x)
-    for m=1:2;x=ifftshift(x,m);x=fftGPU(x,m,gpuF);end
+    for m=1:2;x=ifftshift(x,m);x=fftGPU(x,m);end
 end
 
 function x=ifft2D(x)
-    for m=1:2;x=ifftGPU(x,m,gpuF);x=fftshift(x,m);end
+    for m=1:2;x=ifftGPU(x,m);x=fftshift(x,m);end
 end
 
 end

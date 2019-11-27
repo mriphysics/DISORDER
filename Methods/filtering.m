@@ -39,8 +39,8 @@ end
 
 for m=1:nDimsH
     if NH(m)~=1 && ~f
-        if ~c(m);x=fftGPU(x,m,gpuF,F{m});
-        else x=fctGPU(x,m,gpuF);
+        if ~c(m);x=fftGPU(x,m,F{m});
+        else x=fctGPU(x,m);
         end
     end
 end
@@ -60,8 +60,8 @@ x=bsxfun(@times,x,H);
 
 for m=1:nDimsH
     if NH(m)~=1 && ~f
-        if ~c(m);x=ifftGPU(x,m,gpuF,FH{m});
-        else x=ifctGPU(x,m,gpuF);
+        if ~c(m);x=ifftGPU(x,m,FH{m});
+        else x=ifctGPU(x,m);
         end
     end
 end

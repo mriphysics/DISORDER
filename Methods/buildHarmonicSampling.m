@@ -31,16 +31,16 @@ F=buildStandardDFTM(NY(1:2),1,gpu);
 FSt=cell(2,NStates+1);ySt=cell(1,NStates+1);GSt=cell(1,NStates+1);iStInd=cell(1,NStates+1);mSt=H(:);
 y=permute(y,[1 2 5 3 4]);
 y=reshape(y,[prod(NY([1:2 5])) 1 NY(3:4)]);
-if ~isempty(G);G=G(:);end
+if ~isempty(G);G=reshape(G,[prod(NY(1:2)) 1 size(G,3)]);G=repmat(G,[NY(5) 1 1]);end
 c=0;
-for s=1:NStates+1 
+for s=1:NStates+1
     iStInd{s}=find(H==mod(s,NStates+1));
     iStSub=ind2subV(NH,iStInd{s});    
     for m=1:2;FSt{m}{s}=F{m}(iStSub(:,m),:);end
     ySt{s}=dynInd(y,iStInd{s},1);
+    if ~isempty(G);GSt{s}=dynInd(G,iStInd{s},1);end
     mSt(c+1:c+length(iStInd{s}))=s;
     c=c+length(iStInd{s});
-    if ~isempty(G);GSt{s}=G(iStInd{s});end
 end
 ySt=cat(1,ySt{:});
 GSt=cat(1,GSt{:});

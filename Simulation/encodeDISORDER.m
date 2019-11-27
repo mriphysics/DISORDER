@@ -46,6 +46,6 @@ for m=1:2
     end  
     x=fold(x,m,size(x,m),NY(m));%U    
 end
-for m=1:2;x=fftGPU(x,m,gpuF);end%F
+for m=1:2;x=fftGPU(x,m);end%F
 if ~isempty(y);x=bsxfun(@minus,x,y);end
 if ~isempty(A) && numel(A)~=2;x=bsxfun(@times,x,A);end%A

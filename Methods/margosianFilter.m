@@ -20,7 +20,7 @@ if nargin<5 || isempty(filt);filt='ramp';end
 if nargin<6 || isempty(useh);useh=0;end
 
 gpu=isa(x,'gpuArray');
-NDims=length(Enc.KRange);
+NDims=length(Enc.kRange);
 N=size(x);N(end+1:NDims)=1;N(4:end)=[];
 
 if Enc.FOVSize(3)==1 && N(3)>1;Enc.FOVSize(3)=N(3);end
@@ -31,7 +31,7 @@ invert=1e-3;
 invert2=1e-6;if invert>=invert2;invert2=0;end
 indMA=cell(NDims,3);indMB=cell(NDims,3);
 for m=1:NDims
-    NR=diff(Enc.KRange{m}(e,:))+1;
+    NR=diff(Enc.kRange{m}(e,:))+1;
     if NR~=1 && NR~=Enc.AcqSize(m)
         pfFactor=NR/Enc.AcqSize(m);     
         cutOffInd=round(Enc.FOVSize(m)*(1-pfFactor)+1);        
@@ -55,7 +55,7 @@ for m=1:NDims
         
         if ~di;H=1./(H+invert2);end
         if gpu;H=gpuArray(H);F=gpuArray(F);end
-        if abs(Enc.KRange{m}(e,1))>abs(Enc.KRange{m}(e,2))
+        if abs(Enc.kRange{m}(e,1))>abs(Enc.kRange{m}(e,2))
             H=flip(H,m);F=flip(F,m);
             for n=1:3;indMB{m}{n}=flip(indMB{m}{n});end
         end        

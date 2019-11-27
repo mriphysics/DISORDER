@@ -4,7 +4,7 @@ function fig0304
 %magnetic resonance imaging with DISORDER: Distributed and Incoherent 
 %Sample Orders for Reconstruction Deblurring using Encoding Redundancy, 
 %L Cordero-Grande, G Ferrazzi, RPAG Teixeira, AN Price, J O’Muircheartaigh, 
-%and JV Hajnal, 2019.
+%and JV Hajnal, arXiv:1910.00540, 2019.
 %   FIG0304
 %
 

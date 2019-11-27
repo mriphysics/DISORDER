@@ -1,7 +1,7 @@
-function [x,T,y]=groupwiseVolumeRegistration(x,W,T,meanT,lev,fracOrd,parComp)
+function [x,T,y,xx]=groupwiseVolumeRegistration(x,W,T,meanT,lev,fracOrd,parComp,xx,tolAccel)
 
 %GROUPWISEVOLUMEREGISTRATION   Per-volume groupwise rigid registration of dynamic studies
-%   [X,T]=GROUPWISEVOLUMEREGISTRATION(X,{W},{T},{MEANT},{LEV},{FRACORD},{PARCOMP})
+%   [X,T,Y,XX]=GROUPWISEVOLUMEREGISTRATION(X,{W},{T},{MEANT},{LEV},{FRACORD},{PARCOMP},{XX},{TOLACCEL})
 %   * X is the data to be registered
 %   * {W} is a mask for the ROI to compute the metric
 %   * {T} is the initial motion parameters (defaults to 0)
@@ -10,9 +10,12 @@ function [x,T,y]=groupwiseVolumeRegistration(x,W,T,meanT,lev,fracOrd,parComp)
 %   * {LEV} are the resolution levels for correction
 %   * {FRACORD} is the fractional finite difference metric order
 %   * {PARCOMP} serves to compute only a given subset of parameters
+%   * {XX} is a cell of data to be transformed as X
+%   * {TOLACCEL} serves to regulate the convergence, the lower the stricter
 %   ** X is the registered data
 %   ** T are the estimated motion parameters
 %   ** Y is the average and std in time
+%   ** XX is some data transformed as X
 %
 
 NX=size(x);NX(end+1:8)=1;ND=max(numDims(x),3);
@@ -24,6 +27,8 @@ if nargin<4 || isempty(meanT);meanT=1;end
 if nargin<5 || isempty(lev);lev=[2 1];end
 if nargin<6 || isempty(fracOrd);fracOrd=0;end
 if nargin<7 || isempty(parComp);parComp=ones(1,6);end
+if nargin<8;xx=[];end
+if nargin<9;tolAccel=1;end
 
 gpu=isa(x,'gpuArray');
 NT=size(T);ndT=ndims(T);
@@ -153,7 +158,7 @@ for l=1:length(lev)
                 fprintf('Maximum change in translation (vox): ');fprintf('%0.3f ',max(traMax,[],1));
                 fprintf('/ Maximum change in rotation (deg): ');fprintf('%0.3f ',max(rotMax,[],1));fprintf('\n');                       
                 traLim=0.16;rotLim=0.08;                
-                acce=lev(l);
+                acce=lev(l)*tolAccel;
                 traLim=traLim*acce;rotLim=rotLim*acce;
                 if max(traMax(:))>traLim || max(rotMax(:))>rotLim;fina=1;end                
                 convT(max(traMax,[],2)<traLim & max(rotMax,[],2)<rotLim)=1;
@@ -167,9 +172,27 @@ end
 [~,kGrid,rkGrid]=generateTransformGrids(NXV,gpu,[],[],1);
 [FT,FTH]=buildStandardDFTM(NXV,0,gpu);
 
+if ~isempty(xx) && gpu
+    if iscell(xx);for n=1:length(xx);xx{n}=gpuArray(xx{n});end
+    else xx=gpuArray(xx);
+    end
+end
+
 for s=1:BlSz(1):NT(ndT-1);vS=s:min(s+BlSz(1)-1,NT(ndT-1));
     etInv=precomputeFactorsSincRigidTransform(kGrid,rkGrid,dynInd(T,vS,ndT-1),0,0,[],1);
     x=dynInd(x,vS,ndT-1,sincRigidTransform(dynInd(x,vS,ndT-1),etInv,0,FT,FTH,0));
+    if ~isempty(xx)
+        if ~iscell(xx);xx=dynInd(xx,vS,ndT-1,sincRigidTransform(dynInd(xx,vS,ndT-1),etInv,0,FT,FTH,0));
+        else for n=1:length(xx);xx{n}=dynInd(xx{n},vS,ndT-1,sincRigidTransform(dynInd(xx{n},vS,ndT-1),etInv,0,FT,FTH,0));end    
+        end
+    end
 end
+
+if ~isempty(xx)
+    if iscell(xx);for n=1:length(xx);xx{n}=gather(xx{n});end
+    else xx=gather(xx);
+    end
+end
+
 y=mean(x,ndT-1);
 y=cat(ndT-1,y,std(x,0,ndT-1));

@@ -27,7 +27,6 @@ if nargin<6 || isempty(tol);tol=1e-2;end
 if nargin<7 || isempty(BlSz);BlSz=1;end
 
 gpu=isa(x,'gpuArray');
-if gpu;gpuF=2;else gpuF=0;end
 x=repmat(real(x),[1 1 1 1 1 BlSz]);
 NX=size(x);NX(end+1:6)=1;NX(6)=BlSz;
 N=prod(NX)/BlSz;
@@ -77,7 +76,7 @@ while ~conv
                 end
             end
             if isfield(EH,'We')
-                for n=1:2;xS=fftGPU(xS,n,gpuF)/sqrt(size(xS,n));end
+                for n=1:2;xS=fftGPU(xS,n)/sqrt(size(xS,n));end
                 xS=bsxfun(@times,xS,sqrt(EH.We));
             end            
             trC=trC+normm(xS,[],1:5);
@@ -88,14 +87,14 @@ while ~conv
         ND=3;%Dimensions
         if isfield(R,'Sh')            
             xF=x;
-            for m=1:ND;xF=fftGPU(xF,m,gpuF);end
+            for m=1:ND;xF=fftGPU(xF,m);end
             NW=size(R.Sh.We,4);
             for w=1:NW
                 sh=R.Sh.sH.S(:,:,:,w);
                 we=R.Sh.We(:,:,:,w);
                 if gpu;sh=gpuArray(sh);we=gpuArray(we);end
                 xS=bsxfun(@times,xF,conj(sh));
-                for m=1:ND;xS=ifftGPU(xS,m,gpuF);end
+                for m=1:ND;xS=ifftGPU(xS,m);end
                 xS=bsxfun(@times,xS,sqrt(we));
                 trC=trC+normm(xS,[],1:4);
             end

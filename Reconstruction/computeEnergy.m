@@ -1,4 +1,4 @@
-function [En,W]=computeEnergy(y,x,E,R,EH,no,di,non,de,avdi,sepnorm)
+function [En,W,res]=computeEnergy(y,x,E,R,EH,no,di,non,de,avdi,sepnorm)
 
 %COMPUTEENERGY   Computes the energy of the solution of a least squares 
 %problem with quadratic regularization. It also serves to provide the
@@ -31,7 +31,8 @@ if nargin<9 || isempty(de);de=1e-9;end
 if nargin<10;avdi=[];end
 if nargin<11 || isempty(sepnorm);sepnorm=0;end
 
-fi=y-encode(x,E);%Residuals in image space generally
+res=encode(x,E)-y;%Residuals in image space generally
+fi=res;
 
 
 if nargin>=5 && isfield(EH,'Mb');fi=bsxfun(@times,fi,sqrt(EH.Mb));end

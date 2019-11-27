@@ -8,7 +8,7 @@ function rec=writeData(rec)
 %
 
 %GENERATE THE FILE NAME
-fileName=sprintf('%s/%s',rec.Names.PathOu,rec.Names.Name);
+fileName=generateNIIFileName(rec);
 if rec.Fail || ~any(rec.Dyn.Typ2Wri)
     if nargout==0;rec=[];end%To save memory
     return;
@@ -17,16 +17,16 @@ rec.Dyn.Typ2Rec(ismember(rec.Dyn.Typ2Rec,[3 6]))=[];
 typ2Rec=rec.Dyn.Typ2Rec;
 
 %REMOVE THE OVERDECODING FROM THOSE DATASETS THAT MAY NEED TO
-for n=typ2Rec';datTyp=rec.Dyn.Types{n};    
-    if ~ismember(n,[5 9 10 12 16]);rec.(datTyp)=removeOverencoding(rec.(datTyp),rec.Enc.OverDec);end
+for n=typ2Rec';datTyp=rec.Plan.Types{n};    
+    if ~ismember(n,[5 9 10 12 16]);rec.(datTyp)=removeOverencoding(rec.(datTyp),rec.Alg.OverDec);end
 end   
 
 %GENERATE THE GEOMETRICAL INFORMATION
-[MS,MT]=generateNIIInformation(rec.Enc.APhiRec);
+[MS,MT]=generateNIIInformation(rec.Par.Mine.APhiRec);
 
 %CORRECTIONS FOR OVERENCODING
 vROI=zeros(4,1);vROI(4)=1;
-overDec=rec.Enc.OverDec;
+overDec=rec.Alg.OverDec;
 overDec(overDec>1)=1;overDec=abs(overDec);        
 for n=1:3
     if overDec(n)>1
@@ -39,7 +39,7 @@ MT(1:3,4)=vROI(1:3);
 
 %GENERATE STRUCTURES FOR WRITING AND WRITE IMAGES
 c=1;
-for n=typ2Rec';datTyp=rec.Dyn.Types{n};datName=rec.Dyn.TypeNames{n};    
+for n=typ2Rec';datTyp=rec.Plan.Types{n};datName=rec.Plan.TypeNames{n};    
     if rec.Dyn.Typ2Wri(n)
         if n==8;rec.(datTyp)=single(abs(rec.(datTyp)));end%Mask      
         x{c}=rec.(datTyp);MSV{c}=MS;MTV{c}=MT;suff{c}=datName;        
@@ -52,7 +52,7 @@ if c>1;writeNII(fileName,suff,x,MSV,MTV);end
 if rec.Dyn.Typ2Wri(17)
     T=gather(rec.T);
     if isfield(rec,'DISORDER');MotionInfo=rec.DISORDER;else MotionInfo=[];end
-    save(sprintf('%s_%s.mat',fileName,strcat(rec.Dyn.TypeNames{17})),'T','MotionInfo');
+    save(sprintf('%s_%s.mat',fileName,strcat(rec.Plan.TypeNames{17})),'T','MotionInfo');
 end
 
 if nargout==0;rec=[];end%To save memory

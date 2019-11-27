@@ -15,6 +15,7 @@ function [x,N]=resPop(x,orDim,M,deDim)
 %
 
 N=size(x);NDor=ndims(x);
+if isempty(orDim);return;end
 
 if nargin<3 || isempty(M)
     M=N(orDim(orDim<=NDor));M=[M ones(sum(orDim>NDor))];

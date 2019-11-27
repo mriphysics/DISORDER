@@ -49,17 +49,26 @@ end
 
 if isfield(E,'NXAcq');x=resampling(x,E.NXAcq);end    
 
+%SLAB EXTRACTION
+if isfield(E,'ZSl') && E.ZSl>0;x=extractSlabs(x,abs(E.ZSl),1,1);end
+
 for a=E.oS(1):E.bS(1):E.dS(1);vA=a:min(a+E.bS(1)-1,E.dS(1));
     if isfield(E,'vA');vA=vA(ismember(vA,E.vA));end
     xT=x;
     %RIGID TRANSFORM (MOTION STATES)
     if isfield(E,'Tr') && ~isempty(E.Tr)
         if any(vA<=E.NMs)
-            if any(E.Tr(:)~=0)
+            if any(E.Tr(:)~=0)              
+                Tr=dynInd(E.Tr,vA(vA<=E.NMs),5);
+                %DEPHASING
+                if isfield(E,'Dc');xT=bsxfun(@times,xT,dephaseRotation(dynInd(Tr,E.Dc.d,6),E.Dc.D));end   
+                %TRANSFORM
                 if isfield(E,'Tf');Tf=extractFactorsSincRigidTransform(E.Tf,vA(vA<=E.NMs),5);
-                else Tf=precomputeFactorsSincRigidTransform(E.kG,E.rkG,dynInd(E.Tr,vA(vA<=E.NMs),5),1,0,1,1);
+                else Tf=precomputeFactorsSincRigidTransform(E.kG,E.rkG,Tr,1,0,1,1);
                 end
                 xT=sincRigidTransform(xT,Tf,1,E.Fof,E.Fob);
+                %%DEPHASING
+                %if isfield(E,'Dc');xT=bsxfun(@times,xT,dephaseRotation(dynInd(Tr,E.Dc.d,6),E.Dc.D));end                                 
             else
                 xT=repmat(xT,[ones(1,4) length(vA(vA<=E.NMs))]);
             end
@@ -68,8 +77,15 @@ for a=E.oS(1):E.bS(1):E.dS(1);vA=a:min(a+E.bS(1)-1,E.dS(1));
             assert(~isempty(xT),'Empty transformed array');
             xT=cat(5,xT,repmat(x,[ones(1,4) sum(vA>E.NMs)]));
         end
-    end      
-    xouT=xT;
+    end
+    
+    %FILTERING (GENERALLY FOR SLICE RECOVERY)
+    if isfield(E,'Sp');xT=filtering(xT,E.Sp);end
+    
+    %SLAB EXTRACTION
+    if isfield(E,'ZSl');xT=extractSlabs(xT,abs(E.ZSl),0,1);end
+    
+    xouT=xT;    
     %COIL PROFILES
     for b=E.oS(2):E.bS(2):E.dS(2);vB=b:min(b+E.bS(2)-1,E.dS(2));
         xS=xT;
@@ -77,8 +93,8 @@ for a=E.oS(1):E.bS(1):E.dS(1);vA=a:min(a+E.bS(1)-1,E.dS(1));
             Saux=dynInd(E.Sf,vB,4);
             if isa(xS,'gpuArray');Saux=gpuArray(Saux);end
             xS=bsxfun(@times,xS,Saux);
-            xS=sum(xS,6);
-        end%Sensitivities        
+            if size(Saux,6)>1;xS=sum(xS,6);end
+        end%Sensitivities         
         
         %SENSE
         if isfield(E,'Uf')%Sense folding (first two dimensions)
@@ -98,10 +114,10 @@ for a=E.oS(1):E.bS(1):E.dS(1);vA=a:min(a+E.bS(1)-1,E.dS(1));
             end
         end        
         if isfield(E,'Es') && E.Es==1 && isfield(E,'Ef');xS=aplGPU(E.Ef',xS,E.pe);end%Space
-        
-        %FOURIER DOMAIN (SEGMENTS)
+
         xouS=xS;
-        if isfield(E,'Fs') && ~isempty(E.Fs)
+        %FOURIER DOMAIN (SEGMENTS)
+        if isfield(E,'Fs') && ~isempty(E.Fs) 
             for c=1:length(vA)
                 xR=dynInd(xS,c,5);xouR=[];
                 if ~isempty(E.Fs{1}{vA(c)})
@@ -117,8 +133,15 @@ for a=E.oS(1):E.bS(1):E.dS(1);vA=a:min(a+E.bS(1)-1,E.dS(1));
                 end
                 if c==1 || isempty(xouS);xouS=xouR;elseif ~isempty(xouR);xouS=cat(1,xouS,xouR);end
             end;xR=[];xouR=[];
-        end
+        end     
+        
+        %FOURIER DOMAIN (MULTISLICE)
+        if isfield(E,'Fms') && ~isempty(E.Fms);xouS=matfun(@mtimes,dynInd(E.Fms,vA,5),xouS);end
+        
+        %SLICE MASK
+        if isfield(E,'Bm') && ~isempty(E.Bm);xouS=sum(bsxfun(@times,xouS,E.Bm),6);end
+        
         if b==E.oS(2) || isempty(xouT);xouT=xouS;elseif ~isempty(xouS);xouT=cat(4,xouT,xouS);end                     
     end;xS=[];xouS=[];
-    if a==E.oS(1) || isempty(xou);xou=xouT;elseif ~isempty(xouT);xou=cat(1,xou,xouT);end
+    if a==E.oS(1) || isempty(xou);xou=xouT;elseif (~isempty(xouT) && isfield(E,'Fs'));xou=cat(1,xou,xouT);elseif ~isempty(xouT);xou=cat(5,xou,xouT);end
 end;xT=[];xouT=[];

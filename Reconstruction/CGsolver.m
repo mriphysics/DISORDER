@@ -32,7 +32,7 @@ if nargin<10 || isempty(tol);tol=1e-5;end%5e-3;end%1e-2;end
 if nargin<11 || isempty(estGF);estGF=[0 0];end
 if nargin<12 || isempty(estCF);estCF=0;end
 if nargin<13 || isempty(deb);deb=1;end
-cF=[];gF=[];
+cF=[];gF=[];rF=[];
 
 NitTest=2;
 tolTyp=stopCondition(tolType,'CG');
@@ -69,6 +69,7 @@ rsold=sum(zr(:));
 En=[];
 if all(abs(rsold(:))<1e-6)
     if estCF;cF=x;end
+    nn=0;
     fprintf('Early termination of CG, data probably corrupted!\n');
     return;    
 end
@@ -80,7 +81,8 @@ for n=1:max(nIt)
     
     g=rsold./sum(conj(p(:)).*EHE(:));%Previous implementation was using conj(rsold) here 
     xup=bsxfun(@times,g,p);
-    x=x+xup;   
+    x=x+xup;
+    
     if mod(n,NitTest)==1 && tolTyp==6
         En(:,n)=computeEnergy(y,x,E,R,EH);
         if deb>=2;fprintf('It %d - Ene Fid: %0.2g / Ene Reg: %0.2g / Ene Tot: %0.2g\n',n,En(1,n),En(2,n),sum(En(:,n)));end

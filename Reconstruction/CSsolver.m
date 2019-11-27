@@ -37,7 +37,6 @@ if nargin<7 || isempty(x)
     if isfield(EH,'We');EH.We=We;end
 end
 gpu=isa(x,'gpuArray');
-if gpu;gpuF=2;else gpuF=0;end
 
 %RESAMPLING
 NN=size(x);
@@ -91,12 +90,12 @@ if deb>=1;tend=toc(tsta);fprintf('Time for final recon: %.3f s\n',tend);end
 
 function computeShearlet
     xF=x;
-    for m=1:3;xF=fftGPU(xF,m,gpuF);end
+    for m=1:3;xF=fftGPU(xF,m);end
     for w=1:NW
         sh=R.Sh.sH.S(:,:,:,w);
         if gpu;sh=gpuArray(sh);end
         sh=bsxfun(@times,conj(sh),xF);
-        for m=1:3;sh=ifftGPU(sh,m,gpuF);end
+        for m=1:3;sh=ifftGPU(sh,m);end
         R.Sh.We(:,:,:,w)=gather(abs(sh));
     end
 end

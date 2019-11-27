@@ -19,8 +19,6 @@ if nargin<4 || isempty(gpu);gpu=single(gpuDeviceCount && ~blockGPU);end
 if nargin<5 || isempty(gibbsRing);gibbsRing=0;end
 if nargin<6 || isempty(c);c=0;end
 
-if gpu;gpuF=2;else gpuF=0;end
-
 ND=length(N);
 if length(c)==1;c=c*ones(1,ND);end
 if length(sp)==1;sp=sp*ones(1,ND);end
@@ -32,7 +30,7 @@ kGrid=generateGrid(N,gpu,2*1i*pi./sp,ceil((N+1)/2));
 rGrid=generateGrid(N,gpu);for n=1:ND;rGrid{n}(:)=0;end
 
 if strcmp(typ,'1stFinite')%First order continuous finite differences   
-    for n=1:ND;x=bsxfun(@plus,x,kGrid{n});end   
+    for n=1:ND;x=bsxfun(@plus,x,kGrid{n});end
 elseif strcmp(typ,'2ndFinite')%Second order continuous finite differences
     for n=1:ND;x=bsxfun(@plus,x,kGrid{n}.^2);end
 elseif strcmp(typ,'1stFiniteDiscreteForward')%First order forward finite differences
@@ -114,7 +112,7 @@ end
 if strcmp(typ,'1stFiniteDiscreteForward') || strcmp(typ,'1stFiniteDiscreteBackward') || strcmp(typ,'2ndFiniteDiscrete')
     for n=1:ND
         if numel(rGrid{n})>1
-            rGrid{n}=fftGPU(rGrid{n},n,gpuF);
+            rGrid{n}=fftGPU(rGrid{n},n);
             if c(n);rGrid{n}=real(rGrid{n});end
             rGrid{n}=fftshift(rGrid{n},n);
             x=bsxfun(@plus,x,rGrid{n});

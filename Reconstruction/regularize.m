@@ -10,7 +10,6 @@ function xou=regularize(x,R,pr)
 
 if nargin<3;pr=[1 2];end
 gpu=isa(x,'gpuArray');
-if gpu;gpuF=2;else gpuF=0;end
 
 xou=x;xou(:)=0;
 if ismember(1,pr)
@@ -28,7 +27,7 @@ if ismember(1,pr)
     if isfield(R,'Sh')
         xF=x;
         ND=numDims(x);
-        for m=1:ND;xF=fftGPU(xF,m,gpuF);end
+        for m=1:ND;xF=fftGPU(xF,m);end
         NW=size(R.Sh.We,4);
         y{5}=xF;y{5}(:)=0;
         for w=1:NW
@@ -36,13 +35,13 @@ if ismember(1,pr)
             we=R.Sh.We(:,:,:,w);
             if gpu;sh=gpuArray(sh);we=gpuArray(we);end
             xFF=bsxfun(@times,xF,conj(sh));
-            for m=1:ND;xFF=ifftGPU(xFF,m,gpuF);end
+            for m=1:ND;xFF=ifftGPU(xFF,m);end
             xFF=bsxfun(@times,xFF,we);
-            for m=1:ND;xFF=fftGPU(xFF,m,gpuF);end
+            for m=1:ND;xFF=fftGPU(xFF,m);end
             xFF=bsxfun(@times,xFF,sh);
             y{5}=y{5}+xFF;
         end
-        for m=1:ND;y{5}=ifftGPU(y{5},m,gpuF);end
+        for m=1:ND;y{5}=ifftGPU(y{5},m);end
         y{5}=(R.Sh.la*R.Sh.p/2)*y{5};        
         %y{5}=(R.Sh.la*R.Sh.p/2)*shearletTransform(bsxfun(@times,R.Sh.We,shearletTransform(x,R.Sh.sH)),R.Sh.sH,-1);
     end%Shearlet   

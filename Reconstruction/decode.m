@@ -27,8 +27,19 @@ for a=E.oS(1):E.bS(1):E.dS(1);vA=a:min(a+E.bS(1)-1,E.dS(1));
     xouT=xT;
     for b=E.oS(2):E.bS(2):E.dS(2);vB=b:min(b+E.bS(2)-1,E.dS(2));
         xS=dynInd(xT,vB,4);
-        %FOURIER DOMAIN (SEGMENTS)
+
         xouS=xS;
+        
+        %SLICE MASK
+        if isfield(E,'Bm') && ~isempty(E.Bm);xouS=bsxfun(@times,xouS,E.Bm);end
+        
+        %FOURIER DOMAIN (MULTISLICE)
+        if isfield(EH,'Fms') && ~isempty(EH.Fms)
+            if isfield(EH,'We');xouS=bsxfun(@times,dynInd(EH.We,vA,5),dynInd(xouS,vA,5));else xouS=dynInd(xouS,vA,5);end
+            xouS=matfun(@mtimes,dynInd(EH.Fms,vA,5),xouS);
+        end
+
+        %FOURIER DOMAIN (SEGMENTS)
         if isfield(E,'Fs') && ~isempty(E.Fs)
             for c=1:length(vA)
                 xR=dynInd(xS,E.nEc(vA(c))+1:E.nEc(vA(c)+1),1);
@@ -74,18 +85,40 @@ for a=E.oS(1):E.bS(1):E.dS(1);vA=a:min(a+E.bS(1)-1,E.dS(1));
         end%Sensitivities
         if b==E.oS(2) || isempty(xouT);xouT=xouS;elseif isfield(E,'Sf') && ~isempty(xouS);xouT=xouT+xouS;elseif ~isempty(xouS);xouT=cat(4,xouT,xouS);end
     end;xS=[];xouS=[];
+    
+    %SLAB EXTRACTION
+    if isfield(E,'ZSl');xouT=extractSlabs(xouT,abs(E.ZSl),1,0);end
+    
+    %FILTERING (GENERALLY FOR SLICE RECOVERY)
+    if isfield(E,'Sp');xouT=filtering(xouT,conj(E.Sp));end
+    
     %RIGID TRANSFORM (MOTION STATES)
     if isfield(E,'Tr') && ~isempty(E.Tr)    
-        if any(E.Tr(:)~=0) && any(vA<=E.NMs)
+        if any(E.Tr(:)~=0) && any(vA<=E.NMs)            
+            xinT=dynInd(xouT,vA<=E.NMs,5);
+            Tr=dynInd(E.Tr,vA(vA<=E.NMs),5);    
+            %%DEPHASING
+            %if isfield(E,'Dc');xinT=bsxfun(@times,xinT,conj(dephaseRotation(dynInd(Tr,E.Dc.d,6),E.Dc.D)));end                                 
+            %TRANSFORM
             if isfield(EH,'Tb');Tb=extractFactorsSincRigidTransform(EH.Tb,vA(vA<=E.NMs),5);
-            else Tb=precomputeFactorsSincRigidTransform(E.kG,E.rkG,dynInd(E.Tr,vA(vA<=E.NMs),5),0,0,1,1);
+            else Tb=precomputeFactorsSincRigidTransform(E.kG,E.rkG,Tr,0,0,1,1);
             end
-            xouT=dynInd(xouT,vA<=E.NMs,5,sincRigidTransform(dynInd(xouT,vA<=E.NMs,5),Tb,0,E.Fof,E.Fob,0));
+            xinT=sincRigidTransform(xinT,Tb,0,E.Fof,E.Fob,0);
+            %DEPHASING
+            if isfield(E,'Dc');xinT=bsxfun(@times,xinT,conj(dephaseRotation(dynInd(Tr,E.Dc.d,6),E.Dc.D)));end  
+            
+            xouT=dynInd(xouT,vA<=E.NMs,5,xinT);
         end
         if ~isempty(xouT);xouT=sum(xouT,5);end
-    end    
-    if a==E.oS(1) || isempty(xou);xou=xouT;elseif isfield(E,'Tr') && ~isempty(xouT);xou=xou+xouT;elseif ~isempty(xouT);xou=cat(5,xou,xouT);end    
+    end
+    if isfield(EH,'Fms') && ~isempty(xouT);xouT=sum(xouT,5);end
+            
+    %SLICE MASK
+    if isfield(E,'Bm') && ~isempty(E.Bm);xouT=sum(xouT,6);end
+
+    if a==E.oS(1) || isempty(xou);xou=xouT;elseif (isfield(E,'Tr') || isfield(EH,'Fms')) && ~isempty(xouT);xou=xou+xouT;elseif ~isempty(xouT);xou=cat(5,xou,xouT);end
 end;xT=[];xouT=[];
+
 if isfield(EH,'Fb')%Filtering
     x=xou;   
     if isfield(EH.Fb,'Fd')
@@ -112,6 +145,9 @@ if isfield(EH,'Fb')%Filtering
         end
     end
 end
+
+%SLAB EXTRACTION
+if isfield(E,'ZSl');xou=extractSlabs(xou,abs(E.ZSl),0,0);end
 
 if isfield(EH,'NXRec');xou=resampling(xou,EH.NXRec);end
 

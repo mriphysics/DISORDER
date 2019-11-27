@@ -16,11 +16,18 @@ if ~exist('gpu','var') || isempty(gpu);gpu=single(gpuDeviceCount && ~blockGPU);e
 N=length(suff);
 x=cell(1,N);MS=cell(1,N);MT=cell(1,N);
 for n=1:N
-    nii=load_untouch_nii(sprintf('%s_%s.nii',dat,suff{n}));
+    fileAbs{1}=sprintf('%s_%s.nii',dat,suff{n});
+    fileAbs{2}=sprintf('%s_%s.nii.gz',dat,suff{n});
+    for l=1:length(fileAbs)
+        if exist(fileAbs{l},'file');nii=load_untouch_nii(fileAbs{l});break;end
+        if l==length(fileAbs);error('File %s does not exist',fileAbs{1});end
+    end
+    if l==1;filePhase=sprintf('%s_%sPh.nii',dat,suff{n});else filePhase=sprintf('%s_%sPh.nii.gz',dat,suff{n});end
+                
     x{n}=nii.img;
     if gpu;x{n}=gpuArray(x{n});end
-    if exist(sprintf('%s_%sPh.nii',dat,suff{n}),'file')
-        nii=load_untouch_nii(sprintf('%s_%sPh.nii',dat,suff{n}));
+    if exist(filePhase,'file')
+        nii=load_untouch_nii(filePhase);
         p=nii.img;
         if gpu;p=gpuArray(p);end
         x{n}=x{n}.*exp(1i*p);

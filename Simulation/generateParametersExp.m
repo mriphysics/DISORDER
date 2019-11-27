@@ -1,9 +1,9 @@
-function [theta,NS,recTypSS]=generateParametersExp(figN,quick)
+function [theta,NS,recTypSS]=generateParametersExp(expN,quick)
 
 %GENERATEPARAMETERSEXP   Generates the parameters for a given synthetic
 %DISORDER experiment
-%   [THETA,NS,RECTYPSS]=GENERATEPARAMETERSEXP(FIGN,QUICK)
-%   * FIGN is the experiment descriptor
+%   [THETA,NS,RECTYPSS]=GENERATEPARAMETERSEXP(EXPN,QUICK)
+%   * EXPN is the experiment descriptor
 %   * {QUICK} is a flag for quick experiments, it defaults to 0
 %   ** THETA is a vector with each column specifying the rotation parameter.
 %   row 1 is inter-shot rotation, row 2 is inter-shot translation, row 3 
@@ -30,20 +30,25 @@ function [theta,NS,recTypSS]=generateParametersExp(figN,quick)
 
 if nargin<2 || isempty(quick);quick=0;end
 
-if strcmp(figN,'05')
+if strcmp(expN,'05')
     theta=[2 5 10];
-    NS=[4 16 64];
+    NS=[4 64];
     recTyp={'Sequential','Checkered','Random','Random-checkered'};%Type of reconstruction
     for n=1:length(recTyp);recTyp{n}=strcat(recTyp{n},'_1','_1');end
-elseif strcmp(figN,'06')
+elseif strcmp(expN,'06')
     theta=[5 10 20];
-    NS=[16 64 256];  
+    NS=[16 256];  
     recTyp={'Checkered_1','Random_1','Random-checkered_1','Checkered_2','Random_2','Random-checkered_2'};
     for n=1:length(recTyp);recTyp{n}=strcat(recTyp{n},'_1');end    
-elseif strcmp(figN,'07')
+elseif strcmp(expN,'07')
     theta=[0 5 10 20];
-    NS=[64 25 16;
-        1 1.6 2];
+    if ~quick
+        NS=[64 16;
+            1 2];
+    else
+        NS=[64 25 16;
+             1 1.6 2];
+    end
     recTyp={'Checkered_2','Random_2','Random-checkered_2'};
     for n=1:length(recTyp);recTyp{n}=strcat(recTyp{n},'_1');end
 end
