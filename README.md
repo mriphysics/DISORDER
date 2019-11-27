@@ -44,7 +44,7 @@ contains functions to simulate aligned reconstruction problems: *decodeDISORDER.
 
 NOTE 1: Exemplary data is provided in the datasets *exampleSpectrum.txt* (used by *fig0304.m*), *xGT.mat* (used by *fig0506.m*), and *GT.mat* and *Q[1-3].mat* (used by *fig0708.m*). For runs without changing the paths, they should be placed in a folder
 ###### ../DISORDERData
-Data generated when running the scripts appears in subfolders *Results5-6*, *Results7*. Nifti files are generated in subfolder *An-Ve* with suffixes *_Aq.nii* (no motion correction), *_Di.nii* (with correction) and *_Re.nii* (with robust correction).
+Data generated when running the scripts appears in subfolders *Results5-6*, *Results7*. Nifti files are generated in subfolder *An-Ve* with suffixes **_Aq.nii* (no motion correction), **_Di.nii* (with correction) and **_Re.nii* (with robust correction).
 
 
 NOTE 2: As for simulations, the provided execution should give a simplified version of the Figures in the paper, set 'quick=0' when calling *fig0506.m* to generate all the plots. As for reconstructions on real data *fig0708.m* these are computationally heavy; please, refer to the computation details in the manuscript to assess if your computing resources are adequate.
