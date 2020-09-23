@@ -38,7 +38,7 @@ contains functions to perform aligned reconstructions: *CGsolver.m*, *computeEne
 ###### ./Shearlets
 contains functions that build the shearlet frames for regularization: *buildDirectionalFilter.m*, *buildQuadratureMirrorFilter.m*, *buildShearlet.m*, *buildWedgeBandpassAndLowpassFilters.m*, *checkFilterFeasibility.m*, *getShearletIdxs.m*.
 
-###### ./Reconstruction
+###### ./Simulation
 contains functions to simulate aligned reconstruction problems: *decodeDISORDER.m*, *directionDISORDER.m*, *encodeDISORDER.m*, *errorFit.m*, *generateParametersExp.m*, *gradientDISORDER.m*, *precondDISORDER.m*, *pyramidDISORDER.m*, *SNRToLevels.m*, *synthesizeEncoding.m*, *synthesizeT.m*, *synthesizeY.m*, *Xsolver.m*.
 
 
